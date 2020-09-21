@@ -4,9 +4,9 @@
  *
  * SPDX-License-Identifier: MIT
  * --------------------------------------------------------------------------------- *
- * Anidea for Virtual Button
+ * Anidea for Virtual Momentary
  * =========================
- * Version:	 20.08.21.00 (edited)
+ * Version:	 20.08.09.02 (edited)
  *
  * This device handler implements a virtual button using the Button,
  * Momentary action Contact Sensor, Motion Sensor and Switch.	
@@ -17,8 +17,8 @@
 
 metadata
 {
-	definition( name: 'Anidea for Virtual Button', namespace: 'orangebucket', author: 'Graham Johnson',
-    			ocfDeviceType: 'x.com.st.d.remotecontroller', mnmn: 'SmartThingsCommunity', vid: '9dbc9d7d-4f08-3657-9650-68aef8bac423' )
+	definition( name: 'Anidea for Virtual Momentary', namespace: 'orangebucket', author: 'Graham Johnson',
+    			ocfDeviceType: 'x.com.st.d.remotecontroller', mnmn: 'SmartThingsCommunity', vid: '18570b53-3a92-34ac-8134-f9c0dc671e5c' )
     {
     	//
 	capability 'Button'

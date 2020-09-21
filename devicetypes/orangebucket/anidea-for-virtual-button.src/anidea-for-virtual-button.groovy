@@ -6,10 +6,13 @@
  * --------------------------------------------------------------------------------- *
  * Anidea for Virtual Button
  * =========================
- * Version:	 20.08.21.00
+ * Version:	 20.08.21.00 (edited)
  *
- * This device handler implements a simple virtual button using the Button and
- * Momentary capabilities.
+ * This device handler implements a virtual button using the Button,
+ * Momentary action Contact Sensor, Motion Sensor and Switch.	
+ * The capabilities are permanently in place, and the momentary switch action is permanently	
+ * enable, but the other two momentary actions are controlled by booleans in the settings	
+ * and are not enabled by default.
  */
 
 metadata
@@ -18,20 +21,25 @@ metadata
     			ocfDeviceType: 'x.com.st.d.remotecontroller', mnmn: 'SmartThingsCommunity', vid: '9dbc9d7d-4f08-3657-9650-68aef8bac423' )
     {
     	//
-		capability 'Button'
+	capability 'Button'
         capability 'Momentary'
-		// 
-		capability 'Health Check'
+	capability 'Contact Sensor'	
+        capability 'Motion Sensor'	
+        capability 'Switch'
+	// 
+	capability 'Health Check'
         //
         capability 'Actuator'
-		capability 'Sensor'
+	capability 'Sensor'
         
 	}
 
 	preferences
-    {
-    	// No preferences are actually needed.
-	}
+     {	
+        input name: 'momentarycontact', type: 'bool',   title: 'Act as momentary Contact Sensor?', description: 'Enter boolean', required: true	
+        input name: 'momentarymotion',  type: 'bool',   title: 'Act as momentary Motion Sensor?',  description: 'Enter boolean', required: true	
+        input name: 'momentarydelay',   type: 'number', title: 'Momentary delay in seconds',       description: 'Enter number of seconds (default = 0)', range: '0..60'	
+     }
 }
 
 // installed() is called when the device is created, and when the device is updated in the IDE.
@@ -50,7 +58,10 @@ def installed()
     
 	sendEvent( name: 'supportedButtonValues', value: supportedbuttons.encodeAsJSON(), displayed: false                      )
 	sendEvent( name: 'numberOfButtons',       value: 1,                               displayed: false                      )
-    sendEvent( name: 'button',                value: 'down_6x', 					  displayed: false, isStateChange: true )
+    	sendEvent( name: 'button',                value: 'down_6x', 			  displayed: false, isStateChange: true )
+	sendEvent( name: 'contact', value: 'closed',   displayed: false )	
+    	sendEvent( name: 'motion',  value: 'inactive', displayed: false )	
+    	sendEvent( name: 'switch',  value: 'off',      displayed: false )	
 }
 
 // updated() seems to be called after installed() when the device is first installed, but not when
@@ -60,6 +71,8 @@ def installed()
 def updated()
 {
 	logger( 'updated', 'info', '' )
+	logger( 'updated', 'debug', 'Momentary Contact Sensor ' + ( momentarycontact ? 'enabled' : 'disabled' ) )	
+    	logger( 'updated', 'debug', 'Momentary Motion Sensor '  + ( momentarymotion  ? 'enabled' : 'disabled' ) )
 }
 
 def logger( method, level = 'debug', message = '' )
@@ -72,7 +85,28 @@ def push()
 {
 	logger( 'push', 'info', '' )
     
-    sendEvent( name: 'button', value: 'pushed', isStateChange: true )
+    	sendEvent( name: 'button', value: 'pushed', isStateChange: true )
+ 	
+	momentaryactive()	
+    	
+	    if ( momentarydelay )	
+	    {	
+		runIn( momentarydelay, momentaryinactive )	
+	    }	
+	    else	
+	    {	
+		momentaryinactive()	
+	    }	
+}	
+def on()	
+{	
+	logger( 'on', 'info', '' )	
+    	
+    push()	
+}	
+def off()	
+{	
+	logger( 'off', 'info', '' )
 }
 
 // parse() is called when the hub receives a message from a device.
@@ -81,4 +115,23 @@ def parse( String description )
     logger( 'parse', 'debug', description )
     
 	// Nothing should appear.
+}
+
+def momentaryactive()	
+{	
+	logger( 'momentaryactive', 'info', '' )	
+    	
+    // Change attributes to the active state.	
+    if ( momentarycontact ) sendEvent( name: 'contact', value: 'open'   )	
+    if ( momentarymotion  ) sendEvent( name: 'motion',  value: 'active' )	
+    sendEvent( name: 'switch',  value: 'on' )	
+}	
+
+def momentaryinactive()	
+{	
+	logger( 'momentaryinactive', 'info', '' )	
+	// Return attributes to inactive state.	
+	if ( momentarycontact ) sendEvent( name: 'contact', value: 'closed'   )	
+    if ( momentarymotion  ) sendEvent( name: 'motion',  value: 'inactive' )	
+    sendEvent( name: 'switch',  value: 'off' )	
 }
